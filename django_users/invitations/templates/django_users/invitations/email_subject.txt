@@ -1,0 +1,1 @@
+{% load i18n %}{% trans "Invitation:Come to the dark side, we have cookies" %}

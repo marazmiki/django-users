@@ -1,0 +1,15 @@
+{% load i18n %}<!DOCTYPE html>
+<html>
+<head>
+    <title>django-users registration</title>
+</head>
+<body>
+<form method="post" action="{% url django_users_login %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p>
+        <input type="submit" value="{% trans "Registration" %}" />
+    </p>
+</form>
+</body>
+</html>

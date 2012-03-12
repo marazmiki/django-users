@@ -1,0 +1,19 @@
+{% load i18n %}<!DOCTYPE html>
+<html>
+<head>
+    <title>django-users login</title>
+</head>
+<body>
+    <form method="post" action="{% url django_users_login %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <p>
+            <input type="submit" value="{% trans "Log in" %}" />
+        </p>
+        <p>
+            <a href="{% url django_users_register %}">{% trans "Sign up" %}</a> |
+            <a href="{% url django_users_reset_password %}">{% trans "Forgot your password?" %}</a>
+        </p>
+    </form>
+</body>
+</html>

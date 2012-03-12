@@ -1,0 +1,7 @@
+.hg/
+.hgignore
+.hgtags
+*.pyc
+*.swp
+*.egg-info
+dist/

@@ -1,0 +1,28 @@
+{% load i18n %}
+
+{# Invites #}
+<ul>
+    {% for i in invited_by_me %}
+    <li>
+        {% if i.invited %}
+            <a href="{{ i.invited.get_absolute_url }}">{{ i.invited.username }}</a> |
+        {% else %}
+            <span>{% blocktrans with email=i.email %}Sent at e-mail {{ email }}{% endblocktrans %}</span>
+            <span>[<a href="{{ i.get_revoke_url }}">{% trans "Revoke" %}</a>]</span>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+
+<p>{% blocktrans with count=available_invites.count %}You have {{ count }} invites left {% endblocktrans %}</p>
+{% if available_invites.count > 0 %}
+<form method="post" action="{% url django_users_invites_send %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p>
+        <input type="submit" value="{% trans "Send invite" %}" />
+    </p>
+</form>
+{% else %}
+<p>{% trans "You haven't invites" %}</p>
+{% endif %}
