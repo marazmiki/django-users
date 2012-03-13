@@ -1,18 +1,16 @@
 from django import test
 from django.conf.urls.defaults import url, patterns
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
 from django_users.authentication.forms import AuthenticationForm
 from django_users.authentication.views import Login, Logout
 from django_users.authentication.signals import already_logged_in, wrong_password, logged_in
 from django_users import settings as settings
-from django_users.tests import create_user, TriggerException, USERNAME, PASSWORD, EMAIL, UserTestBase
+from django_users.tests import TriggerException, USERNAME, PASSWORD, UserTestBase
 
 ###############################################################################
 # SOME HELPERS CLASSES                                                        #
 ###############################################################################
-
 
 class TestAuthenticationForm(AuthenticationForm):
     pass
@@ -37,6 +35,11 @@ class LoginTest(UserTestBase):
         super(LoginTest, self).setUp()
         self.url  = reverse('django_users_login')
 
+    def send_authentication(self, follow=False):
+        return self.client.post(self.url, {'username': USERNAME,
+                                           'password': PASSWORD},
+                                            follow=follow)
+
     def test_get_when_user_is_anonymous(self):
         resp = self.client.get(self.url)
         self.assertEquals(200, resp.status_code)
@@ -53,7 +56,11 @@ class LoginTest(UserTestBase):
         self.assertEquals(302, resp.status_code)
 
     def test_authentication(self):
-        assert self.client.login(username=USERNAME, password=PASSWORD)
+        self.client.get(self.url)
+        resp = self.client.post(self.url, {'username': USERNAME, 'password': PASSWORD}, follow=True)
+        self.assertIn('request', resp.context)
+        self.assertTrue(resp.context['request'].user.is_authenticated())
+
 
     def test_wrong_authentication(self):
         resp = self.client.post(self.url, {
@@ -86,6 +93,7 @@ class LoginTest(UserTestBase):
         def check_call():
             already_logged_in.connect(receiver=self.trigger)
             self.authenticate_user()
+            self.client.get(self.url)
             self.client.post(self.url, {'username': USERNAME,
                                         'password': PASSWORD})
         self.assertRaises(TriggerException, check_call)
@@ -103,7 +111,9 @@ class LoginTest(UserTestBase):
     def test_signal_logged_in(self):
         def check_call():
             logged_in.connect(receiver=self.trigger)
-            self.authenticate_user()
+            self.client.get(self.url)
+            self.client.post(self.url, {'username': USERNAME,
+                                        'password': PASSWORD})
         self.assertRaises(TriggerException, check_call)
         logged_in.disconnect(receiver=self.trigger)
 

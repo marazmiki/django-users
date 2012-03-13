@@ -33,6 +33,7 @@ class Login(View):
     def get(self, request):
         """
         """
+        request.session.set_test_cookie()
         return render(request, self.template_name, {
             'form': self.form_class(request=request),
         })
